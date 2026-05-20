@@ -25,7 +25,7 @@ jobs:
 
       - name: Run tests
         working-directory: ./backend
-        run: ./mvnw test -B
+        run: chmod +x mvnw && ./mvnw test -B
 
       - name: Upload test results
         if: always()
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build JAR
         working-directory: ./backend
-        run: ./mvnw package -DskipTests -B
+        run: chmod +x mvnw && ./mvnw package -DskipTests -B
 
       - name: Build Docker image
         run: docker build -t automarket-backend ./backend
