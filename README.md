@@ -9,6 +9,8 @@ Users can browse, publish, and manage car listings with intelligent features pow
 ## Table of Contents
 
 - [Architecture](#architecture)
+  - [System Design](#system-design)
+  - [Use Case Diagram](#use-case-diagram)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
@@ -24,22 +26,17 @@ Users can browse, publish, and manage car listings with intelligent features pow
 
 ## Architecture
 
-```
-┌─────────────┐     ┌──────────────────┐     ┌──────────────┐
-│  Frontend   │────▶│    Backend API    │────▶│  PostgreSQL   │
-│  React/Vite │     │  Spring Boot 3.2  │     │    16.3       │
-│  port :80   │     │   port :8081      │     │  port :5432   │
-└─────────────┘     └────────┬─────────┘     └──────────────┘
-                             │
-                    ┌────────┴────────┐
-                    │                 │
-              ┌─────▼─────┐   ┌──────▼──────┐
-              │ Groq API  │   │ Prometheus  │──▶ Grafana
-              │ (LLaMA 3) │   │  :9090      │    :3001
-              └───────────┘   └─────────────┘
-```
+### System Design
 
-All services are containerized and orchestrated via Docker Compose. A single command starts the entire platform.
+The platform follows a microservices-oriented architecture with all components containerized via Docker Compose. The frontend communicates with the backend through REST APIs secured with JWT. AI features are powered by an external LLM provider (Groq), and the monitoring stack (Prometheus + Grafana) provides real-time observability.
+
+![System Design](systemdesign.png)
+
+### Use Case Diagram
+
+A single actor (User) interacts with the system — any user can browse, publish listings, manage favorites, and leverage AI features. The external Groq AI system handles price estimation, chat, and description generation.
+
+![Use Case Diagram](ucd.png)
 
 ---
 
