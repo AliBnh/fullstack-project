@@ -10,7 +10,7 @@ Users can browse, publish, and manage car listings with intelligent features pow
 
 - [Architecture](#architecture)
   - [System Design](#system-design)
-  - [Use Case Diagram](#use-case-diagram)
+  - [Functional Requirements](#functional-requirements)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
@@ -32,11 +32,43 @@ The platform follows a microservices-oriented architecture with all components c
 
 ![System Design](systemdesign.png)
 
-### Use Case Diagram
+### Functional Requirements
 
-A single actor (User) interacts with the system — any user can browse, publish listings, manage favorites, and leverage AI features. The external Groq AI system handles price estimation, chat, and description generation.
+**Authentication**
+- Register a new account (email, password, name, phone, city)
+- Log in with email/password and receive a JWT token
+- Persistent session via token stored client-side
 
-![Use Case Diagram](ucd.png)
+**Car Listings**
+- Browse all active listings (public, no auth required)
+- Search and filter by brand, city, fuel type, price range, minimum year
+- Paginated results (configurable page size)
+- View full listing details including seller contact info
+- Publish a new car listing with photo upload
+- Edit own listing (update info, change photo)
+- Delete own listing
+- View all own published listings ("Mes Annonces")
+
+**Favorites**
+- Add any listing to personal favorites
+- Remove a listing from favorites
+- View all favorited listings
+- Visual indicator (filled/empty heart) on listing detail
+
+**Seller Contact**
+- View seller's phone number on listing detail page
+- Click-to-call link for mobile users
+
+**AI Features (powered by Groq LLaMA 3.3 70B)**
+- Estimate fair market price given car specifications
+- Chat with AI assistant about cars, maintenance, Moroccan market
+- Auto-generate professional listing description in French
+- View personal AI interaction history
+
+**Image Management**
+- Upload car photos (JPG/PNG, max 5MB)
+- Images persist across container restarts (Docker volume)
+- Serve uploaded images publicly via API
 
 ---
 
