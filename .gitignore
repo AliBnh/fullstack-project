@@ -1,0 +1,20 @@
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Docker volumes (local)
+uploads/
+
+# PDFs (assignment docs - not source code)
+*.pdf
