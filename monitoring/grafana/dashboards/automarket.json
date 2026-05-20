@@ -18,7 +18,7 @@
       "title": "HTTP Response Time (p95)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "targets": [{ "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{application=\"automarket\"}[5m]))", "legendFormat": "p95 {{uri}}" }],
+      "targets": [{ "expr": "rate(http_server_requests_seconds_sum{application=\"automarket\"}[1m]) / rate(http_server_requests_seconds_count{application=\"automarket\"}[1m])", "legendFormat": "avg {{method}} {{uri}}" }],
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
     },
