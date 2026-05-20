@@ -209,6 +209,8 @@ Pre-configured dashboard **"AutoMarket - Application Monitoring"** with 10 panel
 
 Login: `admin` / `admin`
 
+![Grafana Dashboard](grafana-dashboard.png)
+
 ---
 
 ## Testing
@@ -218,10 +220,14 @@ cd backend
 ./mvnw test
 ```
 
-**12 tests** covering:
+**27 tests** covering:
 - `AuthControllerTest` — register, login, bad credentials, duplicate email
 - `CarControllerTest` — CRUD operations, authorization, ownership checks
+- `CarEdgeCaseTest` — validation, search filters, ownership enforcement, pagination
 - `CarRepositoryTest` — search queries with filters
+- `FavoriteControllerTest` — add, check, remove, duplicate rejection, auth
+- `UploadControllerTest` — upload, serve, auth, 404 handling
+- `AIControllerTest` — auth enforcement, history endpoint
 - `JwtServiceTest` — token generation and validation
 
 Tests use H2 in-memory database (no external dependencies needed).
@@ -235,16 +241,18 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push/PR to `m
 ```
 ┌─────────────────┐     ┌─────────────────┐
 │  test-backend   │────▶│  build-backend  │
-│  (mvn test)     │     │  (JAR + Docker) │
+│  (27 tests)     │     │  (JAR + Docker) │
 └─────────────────┘     └─────────────────┘
-
-┌─────────────────┐
-│ build-frontend  │  (runs in parallel)
-│ (npm + Docker)  │
-└─────────────────┘
+                              │
+┌─────────────────┐     ┌────▼────────────┐
+│ build-frontend  │     │ integration-test│
+│ (npm + Docker)  │────▶│ (docker compose)│
+└─────────────────┘     └─────────────────┘
 ```
 
-Backend build only proceeds if all tests pass.
+Backend build only proceeds if all tests pass. Integration test spins up the full stack and verifies API responses.
+
+![CI/CD Workflow](ci-workflow.png)
 
 ---
 
@@ -309,4 +317,4 @@ Backend build only proceeds if all tests pass.
 
 ## License
 
-This project is developed as part of the Full Stack Development course at ENSIAS.
+This project is licensed under the [MIT License](LICENSE).
