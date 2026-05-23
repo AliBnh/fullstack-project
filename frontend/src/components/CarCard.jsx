@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function CarCard({ car }) {
   const imgSrc = car.imageUrl
-    ? (car.imageUrl.startsWith('http') ? car.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}${car.imageUrl}`)
+    ? (car.imageUrl.startsWith('http') ? car.imageUrl : `${import.meta.env.VITE_API_URL || ''}${car.imageUrl}`)
     : null
 
   return (

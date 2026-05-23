@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automarket-backend
+  labels:
+    app: automarket-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: automarket-backend
+  template:
+    metadata:
+      labels:
+        app: automarket-backend
+    spec:
+      containers:
+        - name: backend
+          image: automarket-backend:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: automarket-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: automarket-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: automarket-config
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: automarket-secrets
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: automarket-secrets
+                  key: DB_PASS
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: automarket-secrets
+                  key: JWT_SECRET
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: automarket-secrets
+                  key: GROQ_API_KEY
+            - name: UPLOAD_DIR
+              value: /app/uploads
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /app/uploads
+      volumes:
+        - name: uploads-storage
+          persistentVolumeClaim:
+            claimName: uploads-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: automarket-backend-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: automarket-backend

@@ -13,6 +13,8 @@ Users can browse, publish, and manage car listings with intelligent features pow
   - [Functional Requirements](#functional-requirements)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+  - [Docker Compose](#quick-start)
+  - [Kubernetes (Minikube)](#kubernetes-deployment)
 - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
 - [AI Features](#ai-features)
@@ -83,7 +85,7 @@ The platform follows a microservices-oriented architecture with all components c
 | Auth | JWT (stateless, BCrypt) | jjwt 0.12.5 |
 | Monitoring | Prometheus + Grafana | v2.53 / 11.1 |
 | CI/CD | GitHub Actions | — |
-| Containers | Docker Compose | — |
+| Containers | Docker Compose / Kubernetes (Minikube) | — |
 | API Docs | SpringDoc OpenAPI (Swagger UI) | 2.5.0 |
 
 ---
@@ -94,6 +96,7 @@ The platform follows a microservices-oriented architecture with all components c
 
 - Docker & Docker Compose
 - Git
+- (Optional) Minikube + kubectl for Kubernetes deployment
 
 ### Quick Start
 
@@ -128,6 +131,66 @@ docker compose up -d
 ```bash
 docker compose down       # Stop services (data persists)
 docker compose down -v    # Stop + delete all data
+```
+
+### Kubernetes Deployment
+
+Deploy the full stack on a local Minikube cluster:
+
+```bash
+# 1. Start Minikube
+minikube start --driver=docker
+
+# 2. Point Docker to Minikube's daemon
+eval $(minikube docker-env)          # Linux/Mac
+# On Windows PowerShell:
+# & minikube -p minikube docker-env --shell powershell | Invoke-Expression
+
+# 3. Build images inside Minikube
+docker build -t automarket-backend:1.0 ./backend
+docker build -t automarket-frontend:1.0 -f k8s/Dockerfile.frontend .
+
+# 4. Deploy (order matters)
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secrets.yaml
+kubectl apply -f k8s/postgres-pvc.yaml
+kubectl apply -f k8s/uploads-pvc.yaml
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+
+# 5. Expose via tunnel (assigns 127.0.0.1 to LoadBalancer)
+minikube tunnel
+
+# 6. Access at http://127.0.0.1
+```
+
+**K8s Architecture:**
+
+| Resource | Replicas | Service Type | Purpose |
+|----------|:--------:|:------------:|---------|
+| PostgreSQL | 1 | ClusterIP (headless) | Database with PersistentVolumeClaim |
+| Backend | 3 | NodePort | Spring Boot API |
+| Frontend | 2 | LoadBalancer | Nginx reverse proxy + React SPA |
+
+**K8s Features Applied (from Labs 1 & 2):**
+- Deployments with multiple replicas (backend: 3, frontend: 2)
+- PersistentVolumeClaim for PostgreSQL data and uploaded images
+- ConfigMap for non-sensitive config (DB host, port, name)
+- Secret for sensitive data (DB password, JWT secret, Groq API key)
+- Environment variables injected via `valueFrom` (configMapKeyRef / secretKeyRef)
+- Headless Service (ClusterIP: None) for internal DB access via DNS
+- NodePort Service for backend
+- LoadBalancer Service for frontend
+- Rolling update strategy (default)
+- Self-healing (pods auto-restart on failure)
+- Nginx reverse proxy routes `/api` → backend service inside the cluster
+
+**Stopping K8s:**
+
+```bash
+kubectl delete -f k8s/
+minikube stop
 ```
 
 ---
@@ -311,6 +374,16 @@ Backend build only proceeds if all tests pass. Integration test spins up the ful
 │   │   └── services/        # Axios API client
 │   ├── Dockerfile           # Multi-stage build (Node → Nginx)
 │   └── nginx.conf           # SPA routing
+├── k8s/
+│   ├── configmap.yaml       # Non-sensitive config (DB host, port, name)
+│   ├── secrets.yaml         # Sensitive data (DB pass, JWT secret, Groq key)
+│   ├── postgres-pvc.yaml    # PersistentVolumeClaim for DB data
+│   ├── uploads-pvc.yaml     # PersistentVolumeClaim for uploaded images
+│   ├── postgres-deployment.yaml  # PostgreSQL Deployment + Headless Service
+│   ├── backend-deployment.yaml   # Backend Deployment (3 replicas) + NodePort Service
+│   ├── frontend-deployment.yaml  # Frontend Deployment (2 replicas) + LoadBalancer Service
+│   ├── nginx.conf           # Nginx config with reverse proxy to backend
+│   └── Dockerfile.frontend  # Frontend build for K8s (with proxy config)
 ├── monitoring/
 │   ├── prometheus.yml       # Scrape config
 │   └── grafana/

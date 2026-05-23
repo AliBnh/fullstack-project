@@ -18,3 +18,6 @@ uploads/
 
 # PDFs (assignment docs - not source code)
 *.pdf
+
+# K8s verification script (dev only)
+k8s/verify.ps1
