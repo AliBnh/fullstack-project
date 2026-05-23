@@ -150,7 +150,11 @@ eval $(minikube docker-env)          # Linux/Mac
 docker build -t automarket-backend:1.0 ./backend
 docker build -t automarket-frontend:1.0 -f k8s/Dockerfile.frontend .
 
-# 4. Deploy (order matters)
+# 4. Set your Groq API key in k8s/secrets.yaml
+#    Generate base64: echo -n 'gsk_your_key_here' | base64
+#    Replace REPLACE_WITH_BASE64_ENCODED_GROQ_KEY with the output
+
+# 5. Deploy (order matters)
 kubectl apply -f k8s/configmap.yaml
 kubectl apply -f k8s/secrets.yaml
 kubectl apply -f k8s/postgres-pvc.yaml
@@ -159,10 +163,10 @@ kubectl apply -f k8s/postgres-deployment.yaml
 kubectl apply -f k8s/backend-deployment.yaml
 kubectl apply -f k8s/frontend-deployment.yaml
 
-# 5. Expose via tunnel (assigns 127.0.0.1 to LoadBalancer)
+# 6. Expose via tunnel (assigns 127.0.0.1 to LoadBalancer)
 minikube tunnel
 
-# 6. Access at http://127.0.0.1
+# 7. Access at http://127.0.0.1
 ```
 
 **K8s Architecture:**
